@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   containers:
-  - image: busybox
+  - image: busybox:{{.Values.version}}
     command:
       - sleep
       - "3600"
