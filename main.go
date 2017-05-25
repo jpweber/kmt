@@ -24,6 +24,7 @@ func main() {
 
 	versionPtr := flag.Bool("version", false, "Show version")
 	filePath := flag.String("i", ".", "template file to input")
+	paramsFile := flag.String("f", "", "Parameter Values file rather than cli args")
 	flag.Var(&paramList, "p", "<NAME>=<VALUE> Supplies a value for the named parameter")
 
 	// Once all flags are declared, call `flag.Parse()`
@@ -33,6 +34,10 @@ func main() {
 	if *versionPtr == true {
 		fmt.Println(appVersion + " Build " + buildNumber)
 		os.Exit(0)
+	}
+
+	if *paramsFile != "" {
+
 	}
 
 	// init Parameters map
