@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/spf13/viper"
 )
 
 var buildNumber string
@@ -24,21 +26,29 @@ func main() {
 
 	versionPtr := flag.Bool("version", false, "Show version")
 	filePath := flag.String("i", ".", "template file to input")
-	paramsFile := flag.String("f", "", "Parameter Values file rather than cli args")
+	// paramsFile := flag.String("f", "", "Parameter Values file rather than cli args")
 	flag.Var(&paramList, "p", "<NAME>=<VALUE> Supplies a value for the named parameter")
 
 	// Once all flags are declared, call `flag.Parse()`
 	// to execute the command-line parsing.
 	flag.Parse()
 
+	viper.SetConfigName("values") // name of config file (without extension)
+	// viper.AddConfigPath("/etc/appname/")  // path to look for the config file in
+	// viper.AddConfigPath("$HOME/.appname") // call multiple times to add many search paths
+	viper.AddConfigPath(".")    // optionally look for config in the working directory
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {             // Handle errors reading the config file
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+
 	if *versionPtr == true {
 		fmt.Println(appVersion + " Build " + buildNumber)
 		os.Exit(0)
 	}
 
-	if *paramsFile != "" {
-
-	}
+	// show the name parameter in the values file
+	fmt.Println(viper.Get("name"))
 
 	// init Parameters map
 	// parameters := ManifestValues{}
