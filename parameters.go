@@ -32,7 +32,6 @@ func (i *CLIParameters) Set(value string) error {
 func initParams(paramList []string) map[string]string {
 	parameters := make(map[string]string)
 	for i := 0; i < len(paramList); i++ {
-		fmt.Printf("%s\n", paramList[i])
 		varParts := strings.Split(paramList[i], "=")
 		if len(varParts) > 1 {
 			parameters[varParts[0]] = strings.Join(varParts[1:], ":")
