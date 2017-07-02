@@ -56,8 +56,6 @@ func main() {
 		Values: initParams(paramList),
 	}
 
-	fmt.Println(parameters.Values["name"])
-
 	// read in the tmplate file
 	tmplBytes, _ := ioutil.ReadFile(*filePath)
 	manifestTmpl := string(tmplBytes)
