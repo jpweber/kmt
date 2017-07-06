@@ -42,6 +42,27 @@ func initParams(paramList []string) map[string]string {
 	return parameters
 }
 
+func mergeParams(fromFile, fromCLI map[string]string) map[string]string {
+	// init the final parameter values list
+	var finalParams = make(map[string]string)
+
+	//Add the values from file to the final params
+	if len(fromFile) > 0 {
+		for k, v := range fromFile {
+			finalParams[k] = v
+		}
+	}
+
+	// Add the values from the CLI overriding any values from file
+	if len(fromCLI) > 0 {
+		for k, v := range fromCLI {
+			finalParams[k] = v
+		}
+	}
+
+	return finalParams
+}
+
 type ManifestValues struct {
 	Values map[string]string
 }
