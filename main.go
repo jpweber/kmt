@@ -19,7 +19,7 @@ import (
 )
 
 var buildNumber string
-var appVersion string
+var appVersion = "1.1.0"
 
 var paramList CLIParameters
 
@@ -35,6 +35,12 @@ func main() {
 	// Once all flags are declared, call `flag.Parse()`
 	// to execute the command-line parsing.
 	flag.Parse()
+
+	// print the version
+	if *versionPtr == true {
+		fmt.Println(appVersion)
+		os.Exit(0)
+	}
 
 	// get absolute path to manifest file
 	manPath, _ := filepath.Abs(*filePath)
@@ -55,17 +61,14 @@ func main() {
 		panic(fmt.Errorf("Fatal error config file: %s", err))
 	}
 
-	// print the version
-	if *versionPtr == true {
-		fmt.Println(appVersion + " Build " + buildNumber)
-		os.Exit(0)
-	}
-
 	// get the values from the values file in to a nice map
-	var valuesFromFile = make(map[string]string)
+	var valuesFromFile = make(map[string]interface{})
 	keys := viper.AllKeys()
 	for _, key := range keys {
-		valuesFromFile[key] = viper.Get(key).(string)
+		// need to build up list of other value types to infer correctly
+
+		valuesFromFile[key] = viper.Get(key)
+
 	}
 
 	// get the params passed as CLI args in to a  nice map

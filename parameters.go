@@ -29,8 +29,8 @@ func (i *CLIParameters) Set(value string) error {
 	return nil
 }
 
-func initParams(paramList []string) map[string]string {
-	parameters := make(map[string]string)
+func initParams(paramList []string) map[string]interface{} {
+	parameters := make(map[string]interface{})
 	for i := 0; i < len(paramList); i++ {
 		varParts := strings.Split(paramList[i], "=")
 		if len(varParts) > 1 {
@@ -42,9 +42,9 @@ func initParams(paramList []string) map[string]string {
 	return parameters
 }
 
-func mergeParams(fromFile, fromCLI map[string]string) map[string]string {
+func mergeParams(fromFile, fromCLI map[string]interface{}) map[string]interface{} {
 	// init the final parameter values list
-	var finalParams = make(map[string]string)
+	var finalParams = make(map[string]interface{})
 
 	//Add the values from file to the final params
 	if len(fromFile) > 0 {
@@ -64,5 +64,5 @@ func mergeParams(fromFile, fromCLI map[string]string) map[string]string {
 }
 
 type ManifestValues struct {
-	Values map[string]string
+	Values map[string]interface{}
 }
