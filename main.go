@@ -42,6 +42,7 @@ func main() {
 	_, manFile := filepath.Split(manPath)
 	// get just the path to the file, excluding the file itself
 	manPath = filepath.Dir(manPath)
+
 	extension := filepath.Ext(manFile)
 	noExtFileName := manFile[0 : len(manFile)-len(extension)]
 
@@ -60,16 +61,19 @@ func main() {
 		os.Exit(0)
 	}
 
-	// show the name parameter in the values file
+	// get the values from the values file in to a nice map
+	var valuesFromFile = make(map[string]string)
 	keys := viper.AllKeys()
 	for _, key := range keys {
-		paramList = append(paramList, key+"="+viper.Get(key).(string))
+		valuesFromFile[key] = viper.Get(key).(string)
 	}
 
-	// init Parameters map
-	// parameters := ManifestValues{}
+	// get the params passed as CLI args in to a  nice map
+	valuesFromCLI := initParams(paramList)
+
+	// Add any CLI values to the
 	parameters := ManifestValues{
-		Values: initParams(paramList),
+		Values: mergeParams(valuesFromFile, valuesFromCLI),
 	}
 
 	// read in the tmplate file
