@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"path/filepath"
@@ -56,9 +57,19 @@ func main() {
 	// viper.AddConfigPath("/etc/appname/")  // path to look for the config file in
 	// viper.AddConfigPath("$HOME/.appname") // call multiple times to add many search paths
 	viper.AddConfigPath(manPath) // optionally look for config in the working directory
-	err := viper.ReadInConfig()  // Find and read the config file
-	if err != nil {              // Handle errors reading the config file
-		panic(fmt.Errorf("Fatal error config file: %s", err))
+
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {             // Handle errors reading the config file
+		// check if the config file simply doesn't exist
+		// it is not a requirement so move on if that is the error
+		_, err := os.Stat(viper.ConfigFileUsed())
+		if err != nil {
+			log.Println("Values file does not exist. Not required. Moving on.")
+		} else {
+			// any other errors reading in the config should cause us to stop
+			panic(fmt.Errorf("Fatal error config file: %s", err))
+		}
+
 	}
 
 	// get the values from the values file in to a nice map
