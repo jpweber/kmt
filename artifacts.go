@@ -15,13 +15,19 @@ func writeArtifacts(manPath, noExtFileName, manifest string, parameters Manifest
 	// a dir container latest versions of the file is also use
 	// ./artifacts/<namespace>/current/filename
 	// place artifacts file in the root dir of the manifests
+	var namespace string
+	if parameters.Values["environ"] == nil {
+		namespace = "default"
+	} else {
+		namespace = parameters.Values["environ"].(string)
+	}
 	rootArt, _ := filepath.Split(manPath)
 	var artPath bytes.Buffer
 	artPath.WriteString(rootArt)
 	artPath.WriteString("/")
 	artPath.WriteString("artifacts")
 	artPath.WriteString("/")
-	artPath.WriteString(parameters.Values["environ"].(string))
+	artPath.WriteString(namespace)
 	artPath.WriteString("/")
 	// get the path for _current_ files before completing the path
 	latestArtPath := artPath.String()
