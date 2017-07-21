@@ -20,7 +20,7 @@ import (
 )
 
 var buildNumber string
-var appVersion = "1.2.0"
+var appVersion = "1.2.1"
 
 var paramList CLIParameters
 
