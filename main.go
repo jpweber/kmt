@@ -20,9 +20,16 @@ import (
 )
 
 var buildNumber string
-var appVersion = "1.2.1"
+var appVersion = "1.2.2"
+var debug = false
 
 var paramList CLIParameters
+
+func logger(logMsg string) {
+	if debug {
+		log.Println(logMsg)
+	}
+}
 
 func main() {
 
@@ -32,7 +39,8 @@ func main() {
 	filePath := flag.String("i", ".", "template file to input")
 	// paramsFile := flag.String("f", "", "Parameter Values file rather than cli args. ")
 	flag.Var(&paramList, "p", "<NAME>=<VALUE> Supplies a value for the named parameter")
-	verbose := flag.Bool("v", false, "verbose output")
+	verbose := flag.Bool("v", false, "Print Parsed Templated to STDOUT")
+	xtraVerbose := flag.Bool("vv", false, "Print Parsed Templated to STDOUT Plus log messages. This is not good for piping to kubectl ")
 
 	// Once all flags are declared, call `flag.Parse()`
 	// to execute the command-line parsing.
@@ -42,6 +50,11 @@ func main() {
 	if *versionPtr == true {
 		fmt.Println(appVersion)
 		os.Exit(0)
+	}
+
+	// check for extra verbose output
+	if *xtraVerbose == true {
+		debug = true
 	}
 
 	// get absolute path to manifest file
@@ -65,7 +78,7 @@ func main() {
 		// it is not a requirement so move on if that is the error
 		_, err := os.Stat(viper.ConfigFileUsed())
 		if err != nil {
-			log.Println("Values file does not exist. Not required. Moving on.")
+			logger("Values file does not exist. Not required. Moving on.")
 		} else {
 			// any other errors reading in the config should cause us to stop
 			panic(fmt.Errorf("Fatal error config file: %s", err))
@@ -102,8 +115,7 @@ func main() {
 	}
 
 	if parameters.Values["name"] != nil && parameters.Values["version"] != nil {
-		fmt.Println(parameters.Values["name"])
-		log.Println("writing artifacts")
+		logger("writing artifacts")
 		writeArtifacts(manPath, noExtFileName, manifest, parameters)
 	}
 
