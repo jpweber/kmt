@@ -121,7 +121,7 @@ func main() {
 		templateFilePath = parameters.Values["template"].(string)
 	}
 
-	// read in the tmplate file
+	// read in the template file
 	tmplBytes, _ := ioutil.ReadFile(templateFilePath)
 	manifestTmpl := string(tmplBytes)
 	manifest := parseManifestTmpl(parameters, manifestTmpl)

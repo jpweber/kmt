@@ -49,13 +49,13 @@ func writeArtifacts(manPath, noExtFileName, manifest string, parameters Manifest
 	var artFile bytes.Buffer
 	artFile.WriteString(artPath.String())
 	artFile.WriteString("/")
-	artFile.WriteString(noExtFileName + "-" + parameters.Values["version"].(string) + ".yaml")
+	artFile.WriteString(parameters.Values["name"].(string) + "-" + parameters.Values["version"].(string) + ".yaml")
 
 	// latest artifact filename
 	var latestArtFile bytes.Buffer
 	latestArtFile.WriteString(latestArtPath)
 	latestArtFile.WriteString("/latest/")
-	latestArtFile.WriteString(noExtFileName + ".yaml")
+	latestArtFile.WriteString(parameters.Values["name"].(string) + ".yaml")
 
 	var wg sync.WaitGroup
 
