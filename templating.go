@@ -17,7 +17,17 @@ func parseManifestTmpl(params ManifestValues, manifestTmpl string) string {
 
 	// t := template.New("manifest-template") //create a new template with some name
 	t := template.Must(template.ParseGlob("templates/*.tmpl"))
-	_, err := t.Parse(manifestTmpl) //parse some content and generate a template, which is an internal representation
+	// add stringJoin function to templated
+	// _ = t.Funcs(template.FuncMap{"StringsJoin": strings.Join})
+	// if err != nil {
+	// 	log.Println("Error adding function to the specified template:", err)
+	// }
+
+	// DEBUG:
+	// fmt.Println("Pre-processing template:", manifestTmpl)
+
+	// parse the user specified manifest template
+	_, err := t.Parse(manifestTmpl)
 	if err != nil {
 		log.Println("Error parsing the  specified template:", err)
 	}

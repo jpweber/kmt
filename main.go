@@ -21,7 +21,7 @@ import (
 )
 
 var buildNumber string
-var appVersion = "1.3.0"
+var appVersion = "1.3.0RC"
 var debug = false
 
 var paramList CLIParameters
@@ -91,11 +91,12 @@ func main() {
 	viper.AddConfigPath(manPath)
 
 	err := viper.ReadInConfig() // Find and read the config file
-	if err != nil {             // Handle errors reading the config file
+	// DEBUG:
+	// fmt.Println("Config file being used for values:", viper.ConfigFileUsed())
+	if err != nil { // Handle errors reading the config file
 		// check if the config file simply doesn't exist
 		// it is not a requirement so move on if that is the error
 		_, err := os.Stat(viper.ConfigFileUsed())
-		fmt.Println("Config file being used for values:", viper.ConfigFileUsed())
 		if err != nil {
 			logger("Values file does not exist. Not required. Moving on.")
 		} else {
@@ -133,6 +134,9 @@ func main() {
 		logger("Using Template File Provided in Values File")
 		templateFilePath = parameters.Values["template"].(string)
 	}
+
+	// DEBUG:
+	// log.Printf("%+v", parameters.Values)
 
 	// read in the template file
 	tmplBytes, _ := ioutil.ReadFile(templateFilePath)
