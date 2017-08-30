@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"path/filepath"
 
@@ -20,7 +21,7 @@ import (
 )
 
 var buildNumber string
-var appVersion = "1.2.2"
+var appVersion = "1.3.0"
 var debug = false
 
 var paramList CLIParameters
@@ -31,13 +32,20 @@ func logger(logMsg string) {
 	}
 }
 
+func stripExt(filename string) string {
+	extension := filepath.Ext(filename)
+	noExtFileName := filename[0 : len(filename)-len(extension)]
+
+	return noExtFileName
+}
+
 func main() {
 
 	// cli options
 
 	versionPtr := flag.Bool("version", false, "Show version")
 	filePath := flag.String("i", ".", "template file to input")
-	// paramsFile := flag.String("f", "", "Parameter Values file rather than cli args. ")
+	paramsFile := flag.String("f", "", "Parameter Values file rather than cli args. ")
 	flag.Var(&paramList, "p", "<NAME>=<VALUE> Supplies a value for the named parameter")
 	verbose := flag.Bool("v", false, "Print Parsed Templated to STDOUT")
 	xtraVerbose := flag.Bool("vv", false, "Print Parsed Templated to STDOUT Plus log messages. This is not good for piping to kubectl ")
@@ -63,14 +71,24 @@ func main() {
 	_, manFile := filepath.Split(manPath)
 	// get just the path to the file, excluding the file itself
 	manPath = filepath.Dir(manPath)
-
 	extension := filepath.Ext(manFile)
 	noExtFileName := manFile[0 : len(manFile)-len(extension)]
 
-	viper.SetConfigName(noExtFileName + "-values") // name of config file (without extension)
-	// viper.AddConfigPath("/etc/appname/")  // path to look for the config file in
-	// viper.AddConfigPath("$HOME/.appname") // call multiple times to add many search paths
-	viper.AddConfigPath(manPath) // optionally look for config in the working directory
+	if *paramsFile != "" {
+		// someone specified a values file. Use this one instead
+		// of deriving one based on convention
+		viper.SetConfigName(stripExt(*paramsFile))
+		// reset manpath to the path to the paramsFile
+		// for use when we read in the config file
+		manPath, _ = filepath.Abs(*paramsFile)
+		manPath = filepath.Dir(manPath)
+	} else {
+		// someone provided a normal template.
+		// set the config file based on the convesion of templatename-values
+		viper.SetConfigName(noExtFileName + "-values")
+	}
+	// look for config in the working directory
+	viper.AddConfigPath(manPath)
 
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
@@ -91,9 +109,7 @@ func main() {
 	keys := viper.AllKeys()
 	for _, key := range keys {
 		// need to build up list of other value types to infer correctly
-
 		valuesFromFile[key] = viper.Get(key)
-
 	}
 
 	// get the params passed as CLI args in to a  nice map
@@ -104,13 +120,26 @@ func main() {
 		Values: mergeParams(valuesFromFile, valuesFromCLI),
 	}
 
-	// read in the tmplate file
-	tmplBytes, _ := ioutil.ReadFile(*filePath)
+	// Add in a timestamp to the values for anyone templates that
+	// are expecting one.
+	t := time.Now().UTC()
+	parameters.Values["date"] = fmt.Sprintf(t.Format("20060102_15:04:05"))
+
+	// check to see if we should read in a template
+	// from the filename in the values (params) file.
+	templateFilePath := *filePath
+	if parameters.Values["template"] != nil {
+		logger("Using Template File Provided in Values File")
+		templateFilePath = parameters.Values["template"].(string)
+	}
+
+	// read in the template file
+	tmplBytes, _ := ioutil.ReadFile(templateFilePath)
 	manifestTmpl := string(tmplBytes)
 	manifest := parseManifestTmpl(parameters, manifestTmpl)
 
 	// print file output to screen if verbose
-	if *verbose {
+	if *verbose || *xtraVerbose {
 		fmt.Println(manifest)
 	}
 
