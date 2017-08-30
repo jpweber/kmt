@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"path/filepath"
 
@@ -20,7 +21,7 @@ import (
 )
 
 var buildNumber string
-var appVersion = "1.2.2"
+var appVersion = "1.3.0"
 var debug = false
 
 var paramList CLIParameters
@@ -29,6 +30,13 @@ func logger(logMsg string) {
 	if debug {
 		log.Println(logMsg)
 	}
+}
+
+func stripExt(filename string) string {
+	extension := filepath.Ext(filename)
+	noExtFileName := filename[0 : len(filename)-len(extension)]
+
+	return noExtFileName
 }
 
 func main() {
@@ -69,7 +77,7 @@ func main() {
 	if *paramsFile != "" {
 		// someone specified a values file. Use this one instead
 		// of deriving one based on convention
-		viper.SetConfigName(*paramsFile)
+		viper.SetConfigName(stripExt(*paramsFile))
 		// reset manpath to the path to the paramsFile
 		// for use when we read in the config file
 		manPath, _ = filepath.Abs(*paramsFile)
@@ -87,6 +95,7 @@ func main() {
 		// check if the config file simply doesn't exist
 		// it is not a requirement so move on if that is the error
 		_, err := os.Stat(viper.ConfigFileUsed())
+		fmt.Println("Config file being used for values:", viper.ConfigFileUsed())
 		if err != nil {
 			logger("Values file does not exist. Not required. Moving on.")
 		} else {
@@ -102,7 +111,6 @@ func main() {
 	for _, key := range keys {
 		// need to build up list of other value types to infer correctly
 		valuesFromFile[key] = viper.Get(key)
-
 	}
 
 	// get the params passed as CLI args in to a  nice map
@@ -112,6 +120,11 @@ func main() {
 	parameters := ManifestValues{
 		Values: mergeParams(valuesFromFile, valuesFromCLI),
 	}
+
+	// Add in a timestamp to the values for anyone templates that
+	// are expecting one.
+	t := time.Now().UTC()
+	parameters.Values["date"] = fmt.Sprintf(t.Format("20060102_15:04:05"))
 
 	// check to see if we should read in a template
 	// from the filename in the values (params) file.
@@ -127,7 +140,7 @@ func main() {
 	manifest := parseManifestTmpl(parameters, manifestTmpl)
 
 	// print file output to screen if verbose
-	if *verbose {
+	if *verbose || *xtraVerbose {
 		fmt.Println(manifest)
 	}
 
