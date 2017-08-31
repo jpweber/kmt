@@ -20,13 +20,17 @@ a dir container latest versions of the file is also use
 ## Usage
 ```
 Usage of ./kmt:
+  -f string
+    	Parameter Values file rather than cli args.
   -i string
-    	template file to input (default ".")
+    	template file to input
   -p value
     	<NAME>=<VALUE> Supplies a value for the named parameter
-  -v	verbose output
+  -v	Print Parsed Templated to STDOUT
   -version
     	Show version
+  -vv
+    	Print Parsed Templated to STDOUT Plus log messages. This is not good for piping to kubectl
 ```
 
 the verbose option will output the composed manifest file to `STDOUT` whigh is usful for piping to other commands, such as `kubectl` for example.
