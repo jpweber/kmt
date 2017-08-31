@@ -2,3 +2,4 @@
 /.vscode
 /linux_build.sh
 /macos_build.sh
+/.goreleaser.yml
