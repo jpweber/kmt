@@ -13,10 +13,29 @@ import (
 	"text/template"
 )
 
+func initTemplate() *template.Template {
+	// start by trying to init with the templates dir
+	// to include all subtemplates and such.
+	// However this is path specific and doesn't always work
+	// come up with a way to fix this that isn't just passing the template path
+	// as a CLI arg.
+	t, err := template.ParseGlob("templates/*.tmpl")
+	if err != nil {
+		// log the error in debug mode
+		logger(err.Error())
+
+		// init our own empty template if the parseGlob fails
+		t = template.New("manifest-template") //create a new template with some name
+		return t
+	}
+
+	// if the parseglob succeded return that
+	return t
+}
+
 func parseManifestTmpl(params ManifestValues, manifestTmpl string) string {
 
-	// t := template.New("manifest-template") //create a new template with some name
-	t := template.Must(template.ParseGlob("templates/*.tmpl"))
+	t := initTemplate()
 
 	// going to take advantage of this later.
 	// add stringJoin function to templated
