@@ -11,22 +11,32 @@ import (
 
 func writeArtifacts(manPath, noExtFileName, manifest string, parameters ManifestValues) {
 	// by default write out the file to the following path
-	// ./artifacts/<namespace>/<app name>/filename
+	// ./artifacts/<realm>/<namespace>/<app name>/filename
 	// a dir container latest versions of the file is also use
-	// ./artifacts/<namespace>/current/filename
+	// ./artifacts/<realm>/<namespace>/current/filename
+	// if a realm parameter does not exist it will be exlucded from the path.
+	// if a name space is not used "default" will be put in the path
 	// place artifacts file in the root dir of the manifests
 	var namespace string
+
+	// handle blank envivironments
 	if parameters.Values["environ"] == nil {
 		namespace = "default"
 	} else {
 		namespace = parameters.Values["environ"].(string)
 	}
+
 	rootArt, _ := filepath.Split(manPath)
 	var artPath bytes.Buffer
 	artPath.WriteString(rootArt)
 	artPath.WriteString("/")
 	artPath.WriteString("artifacts")
 	artPath.WriteString("/")
+	// include the realm in the path only if it is provided
+	if parameters.Values["realm"] != nil {
+		artPath.WriteString(parameters.Values["realm"].(string))
+		artPath.WriteString("/")
+	}
 	artPath.WriteString(namespace)
 	artPath.WriteString("/")
 	// get the path for _current_ files before completing the path
