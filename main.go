@@ -21,7 +21,7 @@ import (
 )
 
 var buildNumber string
-var appVersion = "1.3.0"
+var appVersion = "1.3.1"
 var debug = false
 
 var paramList CLIParameters
@@ -44,7 +44,7 @@ func main() {
 	// cli options
 
 	versionPtr := flag.Bool("version", false, "Show version")
-	filePath := flag.String("i", ".", "template file to input")
+	filePath := flag.String("i", "", "template file to input")
 	paramsFile := flag.String("f", "", "Parameter Values file rather than cli args. ")
 	flag.Var(&paramList, "p", "<NAME>=<VALUE> Supplies a value for the named parameter")
 	verbose := flag.Bool("v", false, "Print Parsed Templated to STDOUT")
@@ -63,6 +63,12 @@ func main() {
 	// check for extra verbose output
 	if *xtraVerbose == true {
 		debug = true
+	}
+
+	// show usage if one of the required parameters is not provided.
+	if *filePath == "" && *paramsFile == "" {
+		flag.Usage()
+		os.Exit(1)
 	}
 
 	// get absolute path to manifest file
