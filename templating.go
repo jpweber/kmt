@@ -21,7 +21,15 @@ func initTemplate() *template.Template {
 	// However this is path specific and doesn't always work
 	// come up with a way to fix this that isn't just passing the template path
 	// as a CLI arg.
-	t, err := template.ParseGlob("templates/*.tmpl")
+	// create function map for template
+	funcMap := template.FuncMap{
+		"definedAndEq": definedAndEq,
+	}
+
+	// attach the function map to the template
+	// t.Funcs(funcMap)
+	// t := template.New("manifest-template").Funcs(funcMap)
+	t, err := template.New("manifest-template").Funcs(funcMap).ParseGlob("templates/*.tmpl")
 	if err != nil {
 		// log the error in debug mode
 		logger(err.Error())
@@ -59,6 +67,7 @@ func parseManifestTmpl(params ManifestValues, manifestTmpl string) string {
 
 	// parse the user provided manifest template
 	_, err := t.Parse(manifestTmpl)
+
 	if err != nil {
 		log.Fatalln("Error parsing the  specified template:", err)
 	}
@@ -72,4 +81,17 @@ func parseManifestTmpl(params ManifestValues, manifestTmpl string) string {
 
 	return parsedBuffer.String()
 
+}
+
+func definedAndEq(a interface{}, b string) bool {
+	// check for and bail if we are nil
+	if a == nil {
+		return false
+	}
+
+	// make sure the string actually matches
+	if a.(string) == b {
+		return true
+	}
+	return false
 }
