@@ -21,7 +21,7 @@ import (
 )
 
 var buildNumber string
-var appVersion = "1.3.1"
+var appVersion = "1.3.2"
 var debug = false
 
 var paramList CLIParameters
@@ -81,8 +81,8 @@ func main() {
 	noExtFileName := manFile[0 : len(manFile)-len(extension)]
 
 	if *paramsFile != "" {
-		// someone specified a values file. Use this one instead
-		// of deriving one based on convention
+		// someone specified a values file. with the -f flag
+		// Use this one instead of deriving one based on convention
 		viper.SetConfigName(stripExt(*paramsFile))
 		// reset manpath to the path to the paramsFile
 		// for use when we read in the config file
@@ -131,17 +131,17 @@ func main() {
 	t := time.Now().UTC()
 	parameters.Values["date"] = fmt.Sprintf(t.Format("20060102_15:04:05"))
 
-	// check to see if we should read in a template
-	// from the filename in the values (params) file.
-	templateFilePath := *filePath
-	if parameters.Values["template"] != nil {
-		logger("Using Template File Provided in Values File")
-		templateFilePath = parameters.Values["template"].(string)
+	// If an template file was provided via CLI args read that in.
+	var manifestTmpl string
+	if *filePath != "" {
+		tmplBytes, _ := ioutil.ReadFile(*filePath)
+		manifestTmpl = string(tmplBytes)
+	} else {
+		logger("generating base template from provided template name in values file")
+		manifestTmpl = "{{ template  \"" + parameters.Values["template"].(string) + "\" . }}"
 	}
 
-	// read in the template file
-	tmplBytes, _ := ioutil.ReadFile(templateFilePath)
-	manifestTmpl := string(tmplBytes)
+	// populate the template with values
 	manifest := parseManifestTmpl(parameters, manifestTmpl)
 
 	// print file output to screen if verbose
@@ -149,6 +149,7 @@ func main() {
 		fmt.Println(manifest)
 	}
 
+	// save the finished file to disk in an artifacts dir.
 	if parameters.Values["name"] != nil && parameters.Values["version"] != nil {
 		logger("writing artifacts")
 		writeArtifacts(manPath, noExtFileName, manifest, parameters)
