@@ -21,7 +21,7 @@ import (
 )
 
 var buildNumber string
-var appVersion = "1.3.2"
+var appVersion = "1.3.3"
 var debug = false
 
 var paramList CLIParameters
