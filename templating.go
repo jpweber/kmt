@@ -50,7 +50,6 @@ func parseManifestTmpl(params ManifestValues, manifestTmpl string) string {
 	// by a values file make sure we know about that template
 	// before moving on.
 	if params.Values["template"] != nil {
-		// TODO: debug
 		logger(fmt.Sprintf("looking for templated named %s", params.Values["template"]))
 		if strings.Contains(t.DefinedTemplates(), params.Values["template"].(string)) == false {
 			log.Println("Known defined templates:", t.DefinedTemplates())
