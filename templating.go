@@ -9,7 +9,9 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
+	"strings"
 	"text/template"
 )
 
@@ -44,17 +46,28 @@ func parseManifestTmpl(params ManifestValues, manifestTmpl string) string {
 	// 	log.Println("Error adding function to the specified template:", err)
 	// }
 
-	// parse the user specified manifest template
+	// if we are using a template name provided
+	// by a values file make sure we know about that template
+	// before moving on.
+	if params.Values["template"] != nil {
+		logger(fmt.Sprintf("looking for templated named %s", params.Values["template"]))
+		if strings.Contains(t.DefinedTemplates(), params.Values["template"].(string)) == false {
+			log.Println("Known defined templates:", t.DefinedTemplates())
+			log.Fatalln("Template Named ", params.Values["template"], "could not  be found")
+		}
+	}
+
+	// parse the user provided manifest template
 	_, err := t.Parse(manifestTmpl)
 	if err != nil {
-		log.Println("Error parsing the  specified template:", err)
+		log.Fatalln("Error parsing the  specified template:", err)
 	}
 
 	parsedBuffer := new(bytes.Buffer)
 
 	err = t.Execute(parsedBuffer, params)
 	if err != nil {
-		log.Println("Error executing template:", err)
+		log.Fatalln("Error executing template:", err)
 	}
 
 	return parsedBuffer.String()
